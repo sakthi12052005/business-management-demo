@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BizFlow — Business Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#7b8498;--line:#e9edf4;--primary:#5b5ce2;--primary2:#7a6ff0;--green:#1da56f;--red:#e85b6b;--shadow:0 10px 30px rgba(28,35,55,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}.sidebar{width:245px;background:#101426;color:#fff;padding:24px 16px;position:fixed;inset:0 auto 0 0}.brand{display:flex;align-items:center;gap:12px;padding:8px 10px 28px}.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c70f3,#4d5ee8);display:grid;place-items:center;font-weight:800}.brand b{font-size:18px}.nav{display:grid;gap:7px}.nav button{border:0;background:transparent;color:#aeb5c8;text-align:left;padding:13px 14px;border-radius:11px;font:600 14px Inter;cursor:pointer}.nav button.active,.nav button:hover{background:#202641;color:#fff}.sidebottom{position:absolute;bottom:22px;left:16px;right:16px;color:#8892aa;font-size:12px;line-height:1.5}
+main{margin-left:245px;width:calc(100% - 245px);padding:28px 34px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}.title h1{margin:0;font-size:26px;letter-spacing:-.5px}.title p{margin:6px 0 0;color:var(--muted);font-size:13px}.user{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:12px}.avatar{width:34px;height:34px;border-radius:10px;background:#ececff;display:grid;place-items:center;color:#5555cf;font-weight:800}
+.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:19px;box-shadow:var(--shadow)}.label{font-size:12px;color:var(--muted);font-weight:600}.value{font-size:24px;font-weight:800;margin-top:8px}.trend{font-size:11px;transition:opacity .18s ease;margin-top:8px;color:var(--green);font-weight:600}.icon{float:right;width:36px;height:36px;border-radius:10px;background:#f0f0ff;display:grid;place-items:center;color:var(--primary)}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-top:18px}.section{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}.section h3{margin:0 0 16px;font-size:15px}.chart{height:230px;display:flex;align-items:end;gap:12px;padding:10px 8px 0}.barwrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:7px}.bar{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,#7770ed,#5b5ce2)}.barwrap span{font-size:10px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:13px 8px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px}td:last-child,th:last-child{text-align:right}
+.pending-pill{cursor:pointer;border:0}.pending-modalbox{width:min(760px,100%);max-height:88vh;overflow:auto}.pending-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}.pending-row:last-child{border-bottom:0}.pending-info{font-size:12px;line-height:1.6}.pending-info small{display:block;color:var(--muted)}.pending-amount{font-size:12px;text-align:right}.pending-balance{color:var(--red);font-weight:800}.pending-empty{text-align:center;padding:30px;color:var(--muted)}.payment-note{font-size:11px;color:var(--muted);margin-top:6px}.balance-preview{background:#fff8e8;border:1px solid #f5dfad;color:#8a6500;border-radius:10px;padding:10px;font-size:12px;margin-top:8px}
+@media(max-width:600px){.pending-row{align-items:flex-start;flex-direction:column}.pending-amount{text-align:left}.pending-row .actions{width:100%}}
+
+.pill{padding:5px 8px;border-radius:999px;font-size:10px;font-weight:700;background:#ecfaf4;color:#16885e}.profit{color:var(--green);font-weight:700}
+.btn{border:0;border-radius:11px;padding:11px 15px;background:var(--primary);color:#fff;font:700 13px Inter;cursor:pointer}.btn.secondary{background:#eef0ff;color:#5555d0}.btn.dark{background:#171c2e}.actions{display:flex;gap:9px;flex-wrap:wrap}.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.search{border:1px solid var(--line);padding:11px 13px;border-radius:10px;background:#fff;min-width:220px;outline:none}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field label{display:block;font-size:11px;font-weight:700;color:#69738a;margin:0 0 7px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #dde2eb;border-radius:10px;outline:none;font:500 13px Inter;background:#fff}.field textarea{min-height:82px;resize:vertical}.full{grid-column:1/-1}.summary{background:#f7f7ff;border:1px solid #e5e5ff;border-radius:13px;padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.summary b{font-size:18px}.summary span{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}
+.reportbox{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.reportbox .card{box-shadow:none}.datebar{display:flex;gap:10px;align-items:end;margin-bottom:18px}.datebar .field{flex:1}
+
+.invoice-meta{display:flex;justify-content:space-between;gap:25px;padding:10px 0 18px}.customer-side,.invoice-side{width:48%;font-size:11px;line-height:1.65}.invoice-side{text-align:right}.mini-title{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:.8px;margin-bottom:4px}.invoice-products{margin-top:8px}.invoice-thanks{margin-top:16px;padding:10px;border-radius:10px;background:#f6f7fb;font-size:11px;color:#667085}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(10,15,30,.5);align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modalbox{background:#fff;width:min(680px,100%);border-radius:18px;padding:25px;box-shadow:0 25px 70px rgba(0,0,0,.2)}.billhead{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:15px}.close{border:0;background:#f0f2f7;border-radius:9px;padding:8px;cursor:pointer}
+
+.customer-modalbox{max-height:88vh;overflow:auto}.customer-profile{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f7f8fc;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}.customer-profile div{font-size:12px;line-height:1.6}.customer-profile b{font-size:14px}.invoice-history{margin-top:12px}.invoice-history .history-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.history-meta{font-size:12px}.history-meta small{display:block;color:var(--muted);margin-top:3px}@media(max-width:600px){.customer-profile{grid-template-columns:1fr}.invoice-history .history-row{align-items:flex-start;flex-direction:column}}
+
+.toast{position:fixed;right:22px;bottom:22px;background:#151a2d;color:#fff;padding:12px 15px;border-radius:10px;font-size:12px;display:none}.toast.show{display:block}
+@media(max-width:900px){.sidebar{width:76px}.brand b,.nav button span,.sidebottom{display:none}.nav button{text-align:center}.app main{margin-left:76px;width:calc(100% - 76px);padding:22px}.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.reportbox{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.top{align-items:flex-start}.user{display:none}.cards,.formgrid,.reportbox{grid-template-columns:1fr}.datebar{display:grid;grid-template-columns:1fr}.search{min-width:0;width:100%}main{padding:18px!important}.title h1{font-size:22px}}
+
+
+.period-tabs{display:flex;gap:8px;margin-bottom:18px;padding:5px;background:#eef0f8;border-radius:13px;width:max-content;max-width:100%}
+.period-tab{border:0;background:transparent;color:#68728a;padding:10px 17px;border-radius:9px;font:700 12px Inter;cursor:pointer;transition:.18s}
+.period-tab:hover{color:#4f50d2}
+.period-tab.active{background:#fff;color:#5154d8;box-shadow:0 3px 10px rgba(35,40,70,.08)}
+.overview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.overview-head h3{margin:0!important}
+.overview-badge{font-size:10px;font-weight:700;color:#5558d8;background:#f0f0ff;padding:6px 9px;border-radius:999px}
+@media(max-width:600px){
+ .period-tabs{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+ .period-tab{padding:9px 4px;font-size:10px}
+ .overview-head{gap:8px}
+}
+
+
+.quick-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.quick-head h3{margin:0!important}
+.quick-period{font-size:10px;font-weight:700;color:#5558d8;background:#f0f0ff;padding:7px 10px;border-radius:999px}
+
+
+.products-box{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcff}
+.products-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.helper{font-size:10px;color:var(--muted)}
+.product-row{display:grid;grid-template-columns:1.5fr .55fr 1fr 1fr auto;gap:9px;align-items:end;padding:12px 0;border-top:1px solid var(--line)}
+.product-row:first-child{border-top:0}
+.product-row .field label{font-size:10px}
+.remove-product{border:0;background:#fff0f2;color:#d64d61;border-radius:9px;padding:11px 12px;cursor:pointer;font-weight:800}
+.item-total{font-size:10px;color:var(--muted);padding:10px 0}
+@media(max-width:700px){.product-row{grid-template-columns:1fr 1fr}.product-row .product-name{grid-column:1/-1}.product-row .remove-wrap{grid-column:2}.products-head{align-items:flex-start;flex-direction:column}.products-head .btn{width:100%}}
+
+/* Mobile-safe responsive fixes */
+html,body{max-width:100%;overflow-x:hidden}
+img,svg,video{max-width:100%;height:auto}
+input,textarea,select,button{max-width:100%;min-width:0}
+.section{min-width:0;overflow:hidden}
+table{min-width:0}
+@media(max-width:600px){
+  .sidebar{position:fixed;top:auto;left:0;right:0;bottom:0;width:100%;height:68px;padding:7px 8px;z-index:50;background:#101426}
+  .brand,.sidebottom{display:none}
+  .nav{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;height:100%}
+  .nav button{padding:7px 2px;text-align:center;font-size:18px;border-radius:9px}
+  .nav button span{display:block!important;font-size:9px;margin-top:2px}
+  main{margin-left:0!important;width:100%!important;padding:16px 12px 84px!important}
+  .top{margin-bottom:18px}
+  .title h1{font-size:20px}
+  .title p{font-size:11px;line-height:1.4}
+  .cards{grid-template-columns:1fr 1fr;gap:9px}
+  .card{padding:13px;border-radius:13px}
+  .value{font-size:18px}
+  .icon{width:30px;height:30px}
+  .grid{grid-template-columns:1fr;gap:12px}
+  .formgrid{grid-template-columns:1fr!important}
+  .full{grid-column:auto!important}
+  .summary{grid-template-columns:1fr 1fr;padding:11px;gap:5px}
+  .summary b{font-size:14px}
+  .summary span{font-size:9px}
+  .toolbar{gap:9px;align-items:flex-start;flex-wrap:wrap}
+  .toolbar h3{font-size:14px}
+  .search{width:100%;min-width:0}
+  .actions .btn{flex:1 1 140px}
+  .datebar{display:grid;grid-template-columns:1fr 1fr}
+  .datebar .btn{grid-column:1/-1}
+  .reportbox{grid-template-columns:1fr 1fr}
+  .section table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .section table tbody,.section table thead{min-width:540px;display:table;width:100%}
+  .modalbox{width:calc(100vw - 24px);max-height:90vh;overflow:auto;padding:17px}
+}
+
+.bill-business-title{text-align:center;width:100%;font-size:22px;font-weight:800;padding:2px 40px}
+.invoice-top{display:flex;justify-content:space-between;gap:28px;padding:16px 0 20px}
+.seller-details,.buyer-details{width:48%;line-height:1.6;font-size:12px}
+.buyer-details{text-align:right}
+
+/* Number input cleanup: only Quantity keeps the spinner arrows */
+input[type="number"]{appearance:textfield;-moz-appearance:textfield}
+input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.p-qty{appearance:auto;-moz-appearance:auto}
+.p-qty::-webkit-inner-spin-button,.p-qty::-webkit-outer-spin-button{-webkit-appearance:auto;margin:0}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo" id="brandLogo">D</div><b id="brandName">Demo Business</b></div>
+  <div class="nav">
+    <button class="active" onclick="showPage('dashboard',this)">◈ <span>Dashboard</span></button>
+    <button onclick="showPage('sales',this)">＋ <span>New Sale</span></button>
+    <button onclick="showPage('customers',this)">♙ <span>Customers</span></button>
+    <button onclick="showPage('reports',this)">▥ <span>Reports</span></button>
+    <button onclick="showPage('settings',this)">⚙ <span>Settings</span></button>
+  </div>
+  <div class="sidebottom">Professional business management<br>Demo workspace</div>
+</aside>
+<main>
+  <div class="top">
+    <div class="title"><h1 id="pageTitle">Welcome to Demo Business 👋</h1><p id="pageSub">Here’s your business overview for today.</p></div>
+    <div class="user"><div class="avatar">A</div><div><b style="font-size:12px">Demo Business</b><div style="font-size:10px;color:var(--muted)">Admin</div></div></div>
+  </div>
+
+  <section id="dashboard" class="page active">
+    <div class="period-tabs" aria-label="Dashboard period">
+      <button class="period-tab active" data-period="today" onclick="setPeriod('today',this)">Today</button>
+      <button class="period-tab" data-period="week" onclick="setPeriod('week',this)">This Week</button>
+      <button class="period-tab" data-period="month" onclick="setPeriod('month',this)">This Month</button>
+      <button class="period-tab" data-period="year" onclick="setPeriod('year',this)">This Year</button>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="icon">₹</div><div class="label">Today’s Sales</div><div class="value" id="periodSales">₹25,500</div><div class="trend" id="salesTrend">Today</div></div>
+      <div class="card"><div class="icon">↗</div><div class="label">Today’s Profit</div><div class="value" id="periodProfit">₹7,250</div><div class="trend" id="profitTrend">Today</div></div>
+      <div class="card"><div class="icon">◷</div><div class="label" id="periodSalesLabel">Today Orders</div><div class="value" id="periodOrders">18</div><div class="trend" id="ordersTrend">Today</div></div>
+      <div class="card"><div class="icon">♙</div><div class="label">Total Customers</div><div class="value" id="periodCustomers">1,248</div><div class="trend" id="customersTrend">↑ 5 new customers today</div></div>
+    </div>
+    <div class="grid">
+      <div class="section"><div class="overview-head"><h3 id="overviewTitle">Today Sales Overview</h3><span class="overview-badge" id="overviewBadge">Today</span></div><div class="chart" id="chart"></div></div>
+      <div class="section"><div class="quick-head"><h3>Quick Summary</h3><span class="quick-period" id="quickPeriod">Today ▾</span></div>
+        <table>
+          <tr><td id="qsOrdersLabel">Orders today</td><td><b id="qsOrders">18</b></td></tr>
+          <tr><td>Wholesale cost</td><td id="qsWholesale">₹17,850</td></tr>
+          <tr><td>Delivery cost</td><td id="qsDelivery">₹400</td></tr>
+          <tr><td>Net profit</td><td class="profit" id="qsProfit">₹7,250</td></tr>
+          <tr><td>Pending bills</td><td><button class="pill pending-pill" id="qsPending" onclick="openPendingBills()" title="View pending bills">3</button></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="section" style="margin-top:18px"><div class="toolbar"><h3 style="margin:0">Recent Sales</h3><button class="btn secondary" onclick="showPage('sales')">View all</button></div>
+      <table><thead><tr><th>Customer</th><th>Product</th><th>Sale</th><th>Profit</th><th>Status</th></tr></thead><tbody id="recent"></tbody></table>
+    </div>
+  </section>
+
+  <section id="sales" class="page">
+    <div class="section">
+      <div class="toolbar"><div><h3 style="margin-bottom:5px">Create New Bill</h3><div style="font-size:11px;color:var(--muted)">Add one or more products, calculate the exact profit, save the customer and generate the invoice.</div></div></div>
+      <div class="formgrid">
+        <div class="field"><label>Customer Name *</label><input id="cname" placeholder="e.g. Arun Kumar"></div>
+        <div class="field"><label>Phone Number *</label><input id="phone" placeholder="e.g. 9876543210"></div>
+        <div class="field full"><label>Address *</label><textarea id="address" placeholder="Customer delivery / billing address"></textarea></div>
+        <div class="field"><label>Invoice Date *</label><input id="invoiceDate" type="date"></div>
+        <div class="field"><label>Payment Method</label><select id="method"><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option></select></div>
+        <div class="field"><label>Payment Status</label><select id="paymentStatus" onchange="updatePaymentFields()"><option value="paid">Paid</option><option value="pending">Pending</option></select></div>
+        <div class="field" id="paidAmountWrap" style="display:none"><label>Paid Amount *</label><input id="paidAmount" type="number" min="0" value="" oninput="calc()" onblur="hideZero(this)" placeholder="Amount received"><div id="balancePreview" class="balance-preview" style="display:none"></div></div>
+
+        <div class="full products-box">
+          <div class="products-head"><div><h3 style="margin:0 0 4px">Products</h3><div class="helper">Add multiple products to the same bill. Quantity × selling price = customer amount.</div></div><button class="btn secondary" type="button" onclick="addProductRow()">＋ Add Product</button></div>
+          <div id="productRows"></div>
+        </div>
+
+        <div class="field"><label>Delivery Cost (Optional)</label><input id="delivery" type="number" value="" min="0" oninput="calc()" onblur="hideZero(this)" placeholder="0"></div>
+        <div class="field"><label>Packing + Label Cost</label><input id="packingLabel" type="number" value="" min="0" oninput="calc()" onblur="hideZero(this)" placeholder="0"></div>
+
+        <div class="full summary"><div><span>Customer Total</span><b id="stotal">₹0</b></div><div><span>Estimated Profit</span><b class="profit" id="sprofit">₹0</b></div></div>
+        <div class="full actions"><button class="btn" type="button" onclick="saveCustomerAndGenerateBill()">Save to Customers & Print Bill</button><button class="btn secondary" type="button" onclick="clearForm()">Clear</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="customers" class="page">
+    <div class="section"><div class="toolbar"><h3>Customers</h3><input class="search" placeholder="Search customer name or invoice number..." oninput="filterCustomers(this.value)"></div>
+      <table><thead><tr><th>Name</th><th>Phone</th><th>Last Purchase</th><th>Total Spent</th><th></th></tr></thead><tbody id="customersTable"></tbody></table>
+    </div>
+  </section>
+
+  <section id="reports" class="page">
+    <div class="section">
+      <div class="toolbar"><div><h3 style="margin-bottom:5px">Reports</h3><div style="font-size:11px;color:var(--muted)">Choose a date range and generate the exact sales report.</div></div><button class="btn" onclick="downloadReport()">Download PDF</button></div>
+      <div class="datebar"><div class="field"><label>From</label><input id="from" type="date"></div><div class="field"><label>To</label><input id="to" type="date"></div><button class="btn secondary" onclick="loadReport()">Generate</button></div>
+      <div class="reportbox"><div class="card"><div class="label">Total Sales</div><div class="value" id="reportSales" style="font-size:20px">₹0</div></div><div class="card"><div class="label">Wholesale Cost</div><div class="value" id="reportWholesale" style="font-size:20px">₹0</div></div><div class="card"><div class="label">Delivery Cost</div><div class="value" id="reportDelivery" style="font-size:20px">₹0</div></div><div class="card"><div class="label">Net Profit</div><div class="value profit" id="reportProfit" style="font-size:20px">₹0</div></div></div>
+      <table><thead><tr><th>Date</th><th>Customer</th><th>Sale</th><th>Cost</th><th>Profit</th></tr></thead><tbody id="reportTable"></tbody></table>
+    </div>
+  </section>
+
+  <section id="settings" class="page">
+    <div class="section"><h3>Business Branding</h3><div class="formgrid">
+      <div class="field"><label>Business Name</label><input id="bizname" value="Demo Business"></div>
+      <div class="field"><label>Phone</label><input id="bizphone" value="+91 98765 43210"></div>
+      <div class="field"><label>Location</label><input id="bizlocation" value="Chennai, Tamil Nadu"></div>
+      <div class="field"><label>Email</label><input id="bizemail" type="email" value="hello@demobusiness.com"></div>
+      <div class="field full"><label>Business Address</label><textarea id="bizaddress">Chennai, Tamil Nadu</textarea></div>
+      <div class="field"><label>Bill Prefix</label><input value="INV-"></div>
+      <div class="full"><button class="btn" onclick="saveSettings()">Save Business Details</button></div>
+    </div></div>
+  </section>
+</main>
+</div>
+
+<div class="modal" id="billModal"><div class="modalbox">
+  <div class="billhead"><div><div style="font-size:20px;font-weight:800">Demo Business</div><div style="font-size:11px;color:var(--muted)">Professional Business Bill</div></div><button class="close" onclick="closeModal()">✕</button></div>
+  <div id="billContent"></div>
+  <div class="actions" style="margin-top:18px"><button class="btn" onclick="printBill()">Print / Save as PDF</button><button class="btn secondary" onclick="closeModal()">Close</button></div>
+</div></div>
+<div class="modal" id="customerModal"><div class="modalbox customer-modalbox">
+  <div class="billhead"><div><div style="font-size:20px;font-weight:800">Customer Details</div><div style="font-size:11px;color:var(--muted)">Purchase history and saved invoices</div></div><button class="close" onclick="closeCustomerModal()">✕</button></div>
+  <div id="customerDetailContent"></div>
+  <div class="actions" style="margin-top:18px"><button class="btn secondary" onclick="closeCustomerModal()">Close</button></div>
+</div></div>
+
+<div class="modal" id="pendingModal"><div class="modalbox pending-modalbox">
+  <div class="billhead"><div><div style="font-size:20px;font-weight:800">Pending Bills</div><div style="font-size:11px;color:var(--muted)">Review unpaid balances and close a bill when payment is received.</div></div><button class="close" onclick="closePendingBills()">✕</button></div>
+  <div id="pendingBillsContent"></div>
+  <div class="actions" style="margin-top:18px"><button class="btn secondary" onclick="closePendingBills()">Close</button></div>
+</div></div>
+
+<div class="toast" id="toast">Saved successfully</div>
+<script>
+const sales=[
+{name:'Kumar',product:'Premium Product',sale:5600,profit:1500,status:'Paid'},
+{name:'Arun',product:'Product Pack',sale:3250,profit:820,status:'Paid'},
+{name:'Priya',product:'Product A',sale:7900,profit:2140,status:'Paid'},
+{name:'Suresh',product:'Product B',sale:4100,profit:980,status:'Paid'}
+];
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+function renderChart(){let vals=[45,65,42,78,60,88,72], days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];document.getElementById('chart').innerHTML=vals.map((v,i)=>`<div class="barwrap"><div class="bar" style="height:${v}%"></div><span>${days[i]}</span></div>`).join('')}
+function renderRecent(){const saved=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');const rows=saved.slice(0,6).map(x=>({name:x.name,product:x.products?.map(p=>p.name).join(', ')||'Product',sale:x.total+(x.delivery||0),profit:x.profit,status:x.status==='pending'?'Pending':'Paid'}));const base=sales.map(x=>x);document.getElementById('recent').innerHTML=[...rows,...base].slice(0,8).map(x=>`<tr><td><b>${escapeHtml(x.name)}</b></td><td>${escapeHtml(x.product)}</td><td>${money(x.sale)}</td><td class="profit">${money(x.profit)}</td><td><span class="pill">${x.status}</span></td></tr>`).join('')}
+function renderCustomers(query=''){
+  const saved=JSON.parse(localStorage.getItem('bizflow_customers')||'[]');
+  const salesSaved=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');
+  const q=(query||'').trim().toLowerCase();
+  let rows=[];
+  if(q){
+    const matchingSales=salesSaved.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.invoice||'').toLowerCase().includes(q)||(x.phone||'').toLowerCase().includes(q));
+    const matchedPhones=new Set(matchingSales.map(x=>x.phone));
+    const matchedCustomers=saved.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.phone||'').toLowerCase().includes(q)||matchedPhones.has(x.phone));
+    rows=matchedCustomers;
+    if(!rows.length && matchingSales.length){
+      rows=matchingSales.map(x=>({name:x.name,phone:x.phone,address:x.address,lastPurchase:x.date,totalSpent:x.total}));
+    }
+  }else rows=saved;
+  if(!rows.length){
+    document.getElementById('customersTable').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px">No matching customer or invoice found.</td></tr>';return;
+  }
+  document.getElementById('customersTable').innerHTML=rows.map(x=>{
+    const last=x.lastPurchase?new Date(x.lastPurchase+'T00:00:00').toLocaleDateString('en-IN'):'—';
+    return `<tr><td><b>${escapeHtml(x.name)}</b></td><td>${escapeHtml(x.phone||'')}</td><td>${last}</td><td>${money(x.totalSpent)}</td><td><button class="btn secondary" style="padding:7px 10px" onclick="viewCustomer('${encodeURIComponent(x.phone||'')}')">View</button></td></tr>`;
+  }).join('');
+}
+function viewCustomer(encodedPhone){
+  const phone=decodeURIComponent(encodedPhone);
+  const customers=JSON.parse(localStorage.getItem('bizflow_customers')||'[]');
+  const allSales=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');
+  const c=customers.find(x=>x.phone===phone) || allSales.find(x=>x.phone===phone);
+  if(!c){toast('Customer record not found');return}
+  const history=allSales.filter(x=>x.phone===phone).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const purchaseTotal=history.reduce((sum,x)=>sum+Number(x.total||0),0);
+  document.getElementById('customerDetailContent').innerHTML=`
+    <div class="customer-profile">
+      <div><span class="mini-title">CUSTOMER</span><br><b>${escapeHtml(c.name||'')}</b></div>
+      <div><span class="mini-title">PHONE</span><br>${escapeHtml(c.phone||'')}</div>
+      <div><span class="mini-title">ADDRESS</span><br>${escapeHtml(c.address||'')}</div>
+      <div><span class="mini-title">TOTAL SPENT</span><br><b>${money(purchaseTotal || c.totalSpent)}</b></div>
+    </div>
+    <div class="toolbar"><h3 style="margin:0">Purchase History</h3><span style="font-size:11px;color:var(--muted)">${history.length} invoice${history.length===1?'':'s'}</span></div>
+    <div class="invoice-history">${history.length?history.map(x=>`<div class="history-row"><div class="history-meta"><b>${escapeHtml(x.invoice)}</b> · ${new Date(x.date+'T00:00:00').toLocaleDateString('en-IN')}<small>${escapeHtml((x.products||[]).map(p=>p.name+' × '+p.qty).join(', '))}</small></div><div class="actions"><b>${money(x.total)}</b><button class="btn secondary" style="padding:7px 10px" onclick="viewSavedInvoice('${encodeURIComponent(x.invoice)}')">View</button><button class="btn" style="padding:7px 10px" onclick="printSavedInvoice('${encodeURIComponent(x.invoice)}')">PDF</button></div></div>`).join(''):'<div style="color:var(--muted);padding:18px 0">No saved invoices found for this customer.</div>'}</div>`;
+  document.getElementById('customerModal').classList.add('show');
+}
+function closeCustomerModal(){document.getElementById('customerModal').classList.remove('show')}
+function findSavedSale(invoice){const allSales=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');return allSales.find(x=>x.invoice===invoice)}
+function viewSavedInvoice(encodedInvoice){const invoice=decodeURIComponent(encodedInvoice);const sale=findSavedSale(invoice);if(!sale){toast('Invoice not found');return}closeCustomerModal();openBill(sale)}
+function printSavedInvoice(encodedInvoice){const invoice=decodeURIComponent(encodedInvoice);const sale=findSavedSale(invoice);if(!sale){toast('Invoice not found');return}openBill(sale);setTimeout(()=>printBill(),200)}
+function reportSales(){
+  const saved=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');
+  return saved.map(x=>({
+    date:x.date||new Date().toISOString().slice(0,10), name:x.name||'Customer',
+    sale:Number(x.total||0), wholesale:Number(x.wholesale||0), delivery:Number(x.delivery||0),
+    profit:Number(x.profit||0), invoice:x.invoice||''
+  }));
+}
+function setDefaultReportDates(){
+  const to=new Date(), from=new Date(); from.setDate(to.getDate()-13);
+  const iso=d=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)};
+  const f=document.getElementById('from'), t=document.getElementById('to');
+  if(f&&!f.value)f.value=iso(from); if(t&&!t.value)t.value=iso(to);
+}
+function renderReports(){setDefaultReportDates();loadReport(false)}
+function loadReport(showToast=true){
+  const from=document.getElementById('from').value, to=document.getElementById('to').value;
+  if(!from||!to){toast('Choose both From and To dates');return}
+  if(from>to){toast('From date cannot be after To date');return}
+  const rows=reportSales().filter(x=>x.date>=from&&x.date<=to);
+  const salesTotal=rows.reduce((a,x)=>a+x.sale,0);
+  const wholesale=rows.reduce((a,x)=>a+x.wholesale,0);
+  const delivery=rows.reduce((a,x)=>a+x.delivery,0);
+  const profit=rows.reduce((a,x)=>a+x.profit,0);
+  document.getElementById('reportSales').textContent=money(salesTotal);
+  document.getElementById('reportWholesale').textContent=money(wholesale);
+  document.getElementById('reportDelivery').textContent=money(delivery);
+  document.getElementById('reportProfit').textContent=money(profit);
+  document.getElementById('reportTable').innerHTML=rows.length?rows.map(x=>`<tr><td>${new Date(x.date+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</td><td>${escapeHtml(x.name)}</td><td>${money(x.sale)}</td><td>${money(x.wholesale+x.delivery)}</td><td class="profit">${money(x.profit)}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:28px">No sales found for this date range.</td></tr>';
+  if(showToast)toast(`${rows.length} sale${rows.length===1?'':'s'} found`);
+}
+function downloadReport(){
+  loadReport(false);
+  const from=document.getElementById('from').value, to=document.getElementById('to').value;
+  if(!from||!to||from>to)return;
+  const rows=reportSales().filter(x=>x.date>=from&&x.date<=to);
+  const biz=businessInfo();
+  const w=window.open('','_blank','width=900,height=700');
+  if(!w){toast('Please allow pop-ups to download the report');return}
+  const f=d=>new Date(d+'T00:00:00').toLocaleDateString('en-IN');
+  const body=rows.map(x=>`<tr><td>${f(x.date)}</td><td>${escapeHtml(x.invoice)}</td><td>${escapeHtml(x.name)}</td><td>${money(x.sale)}</td><td>${money(x.wholesale+x.delivery)}</td><td>${money(x.profit)}</td></tr>`).join('');
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(biz.name)} Report</title><style>body{font-family:Arial,sans-serif;padding:36px;color:#172033}h1{text-align:center;margin:0 0 6px}.sub{text-align:center;color:#667085;margin-bottom:24px}.summary{display:flex;gap:12px;margin:18px 0}.box{flex:1;border:1px solid #e5e7eb;border-radius:10px;padding:14px}.label{font-size:12px;color:#667085}.val{font-size:20px;font-weight:800;margin-top:6px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}th{font-size:12px;color:#667085}@media print{body{padding:15px}}</style></head><body><h1>${escapeHtml(biz.name)}</h1><div class="sub">Sales Report · ${f(from)} to ${f(to)}</div><div class="summary"><div class="box"><div class="label">Total Sales</div><div class="val">${money(rows.reduce((a,x)=>a+x.sale,0))}</div></div><div class="box"><div class="label">Wholesale + Delivery</div><div class="val">${money(rows.reduce((a,x)=>a+x.wholesale+x.delivery,0))}</div></div><div class="box"><div class="label">Net Profit</div><div class="val">${money(rows.reduce((a,x)=>a+x.profit,0))}</div></div></div><table><thead><tr><th>Date</th><th>Invoice</th><th>Customer</th><th>Sale</th><th>Cost</th><th>Profit</th></tr></thead><tbody>${body||'<tr><td colspan="6">No sales in this period.</td></tr>'}</tbody></table></body></html>`);
+  w.document.close();w.onload=()=>{w.focus();setTimeout(()=>w.print(),250)};
+}
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+  const navBtn=btn || document.querySelector(`.nav button[onclick*="showPage('${id}'"]`);
+  if(navBtn)navBtn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+let titles={dashboard:['Welcome to Demo Business 👋','Here’s your business overview for today.'],sales:['Create a New Bill','Turn a sale into a professional customer bill.'],customers:['Customers','Manage customer details and purchase history.'],reports:['Reports','Review and download business performance for any period.'],settings:['Settings','Customize your business identity and bill details.']};document.getElementById('pageTitle').textContent=titles[id][0];document.getElementById('pageSub').textContent=titles[id][1]}
+
+const periodData={
+ today:{sales:25500,profit:7250,orders:18,customers:1248,wholesale:17850,delivery:400,pending:3,label:'Today',title:'Today Sales Overview',trend:'Today'},
+ week:{sales:142500,profit:39800,orders:94,customers:1312,wholesale:101200,delivery:1500,pending:8,label:'This Week',title:'This Week Sales Overview',trend:'This week'},
+ month:{sales:586000,profit:143000,orders:386,customers:1468,wholesale:415000,delivery:28000,pending:21,label:'This Month',title:'This Month Sales Overview',trend:'This month'},
+ year:{sales:4825000,profit:1214000,orders:3240,customers:4285,wholesale:3380000,delivery:231000,pending:64,label:'This Year',title:'This Year Sales Overview',trend:'This year'}
+};
+
+const customerGrowth=[
+  '↑ 5 new customers today',
+  '↑ 18 new customers this week',
+  '↑ 64 new customers this month',
+  '↑ 412 new customers this year'
+];
+let customerGrowthIndex=0;
+function rotateCustomerGrowth(){
+  const el=document.getElementById('customersTrend');
+  if(!el)return;
+  el.style.opacity='0';
+  setTimeout(()=>{
+    customerGrowthIndex=(customerGrowthIndex+1)%customerGrowth.length;
+    el.textContent=customerGrowth[customerGrowthIndex];
+    el.style.opacity='1';
+  },180);
+}
+
+function setPeriod(period,el){
+  document.querySelectorAll('.period-tab').forEach(x=>x.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const d=periodData[period];
+  document.getElementById('periodSales').textContent=money(d.sales);
+  document.getElementById('periodProfit').textContent=money(d.profit);
+  document.getElementById('periodOrders').textContent=d.orders.toLocaleString('en-IN');
+  document.getElementById('periodCustomers').textContent='1,248';
+  document.getElementById('salesTrend').textContent=d.trend;
+  document.getElementById('profitTrend').textContent=d.trend;
+  document.getElementById('ordersTrend').textContent=d.trend;
+  document.getElementById('customersTrend').textContent=customerGrowth[customerGrowthIndex];
+  document.getElementById('periodSalesLabel').textContent=d.label+' Orders';
+  
+  document.getElementById('overviewTitle').textContent=d.title;
+  document.getElementById('overviewBadge').textContent=d.label;
+  document.getElementById('quickPeriod').textContent=d.label+' ▾';
+  document.getElementById('qsOrdersLabel').textContent='Orders • '+d.label;
+  document.getElementById('qsOrders').textContent=d.orders.toLocaleString('en-IN');
+  document.getElementById('qsWholesale').textContent=money(d.wholesale);
+  document.getElementById('qsDelivery').textContent=money(d.delivery);
+  document.getElementById('qsProfit').textContent=money(d.profit);
+  document.getElementById('qsPending').textContent=pendingCountForPeriod(period);
+  renderPeriodChart(period);
+}
+function renderPeriodChart(period){
+  const charts={
+    today:{vals:[35,58,42,72,50,88,64],labels:['9AM','11AM','1PM','3PM','5PM','7PM','9PM']},
+    week:{vals:[42,66,51,78,59,91,72],labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']},
+    month:{vals:[48,64,56,82,67,92,75],labels:['W1','W2','W3','W4','W5','W6','W7']},
+    year:{vals:[42,55,49,68,57,76,88],labels:['Jan','Feb','Mar','Apr','May','Jun','Jul']}
+  };
+  const c=charts[period];
+  document.getElementById('chart').innerHTML=c.vals.map((v,i)=>`<div class="barwrap"><div class="bar" style="height:${v}%"></div><span>${c.labels[i]}</span></div>`).join('');
+}
+
+function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function initInvoiceDate(){const d=document.getElementById('invoiceDate');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10)}
+function addProductRow(data={name:'',qty:1,wholesale:0,selling:0}){
+  const box=document.getElementById('productRows');
+  const row=document.createElement('div');row.className='product-row';
+  row.innerHTML=`<div class="field product-name"><label>Product / Service *</label><input class="p-name" placeholder="Product name" value="${escapeHtml(data.name)}"></div>
+    <div class="field"><label>Quantity</label><input class="p-qty" type="number" min="1" value="${data.qty||1}" oninput="calc()"></div>
+    <div class="field"><label>Wholesale / Unit</label><input class="p-wholesale" type="number" min="0" value="${data.wholesale ? data.wholesale : ''}" oninput="calc()" onblur="hideZero(this)"></div>
+    <div class="field"><label>Selling / Unit *</label><input class="p-selling" type="number" min="0" value="${data.selling ? data.selling : ''}" oninput="calc()" onblur="hideZero(this)"></div>
+    <div class="remove-wrap"><button class="remove-product" type="button" onclick="removeProductRow(this)">✕</button></div>`;
+  box.appendChild(row);calc();
+}
+function removeProductRow(btn){const rows=document.querySelectorAll('.product-row');if(rows.length===1){toast('At least one product is required');return}btn.closest('.product-row').remove();calc()}
+function getProducts(){return [...document.querySelectorAll('.product-row')].map(r=>({name:r.querySelector('.p-name').value.trim(),qty:+r.querySelector('.p-qty').value||1,wholesale:+r.querySelector('.p-wholesale').value||0,selling:+r.querySelector('.p-selling').value||0})).filter(x=>x.name)}
+function updatePaymentFields(){
+  const status=document.getElementById('paymentStatus')?.value||'paid';
+  const wrap=document.getElementById('paidAmountWrap');
+  if(!wrap)return;
+  wrap.style.display=status==='pending'?'block':'none';
+  if(status!=='pending'){
+    const pa=document.getElementById('paidAmount');if(pa)pa.value='';
+    const bp=document.getElementById('balancePreview');if(bp)bp.style.display='none';
+  }
+  calc();
+}
+function updateBalancePreview(total){
+  const status=document.getElementById('paymentStatus')?.value||'paid';
+  const bp=document.getElementById('balancePreview');
+  if(!bp)return;
+  if(status!=='pending'){bp.style.display='none';return}
+  const paid=+document.getElementById('paidAmount').value||0;
+  const balance=Math.max(0,total-paid);
+  bp.style.display='block';
+  bp.textContent=balance>0?`Balance due: ${money(balance)}`:'No balance remaining';
+}
+function getPendingSales(){
+  const all=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');
+  return all.filter(x=>x.status==='pending' && Number(x.balance||0)>0);
+}
+function openPendingBills(){
+  renderPendingBills();
+  document.getElementById('pendingModal').classList.add('show');
+}
+function closePendingBills(){document.getElementById('pendingModal').classList.remove('show')}
+function renderPendingBills(){
+  const pending=getPendingSales();
+  const el=document.getElementById('pendingBillsContent');
+  if(!pending.length){el.innerHTML='<div class="pending-empty">No pending bills. All payments are up to date.</div>';return}
+  el.innerHTML=pending.map(x=>`<div class="pending-row">
+    <div class="pending-info"><b>${escapeHtml(x.invoice)}</b> · ${escapeHtml(x.name)}<small>${new Date(x.date+'T00:00:00').toLocaleDateString('en-IN')} · ${escapeHtml((x.products||[]).map(p=>p.name+' × '+p.qty).join(', '))}</small></div>
+    <div class="pending-amount"><div>Total ${money(x.total)}</div><div>Paid ${money(x.paidAmount)}</div><div class="pending-balance">Balance ${money(x.balance)}</div></div>
+    <div class="actions"><button class="btn secondary" style="padding:7px 10px" onclick="viewSavedInvoice('${encodeURIComponent(x.invoice)}');closePendingBills()">View Bill</button><button class="btn" style="padding:7px 10px" onclick="markBillPaid('${encodeURIComponent(x.invoice)}')">Mark as Paid</button></div>
+  </div>`).join('');
+}
+function markBillPaid(encodedInvoice){
+  const invoice=decodeURIComponent(encodedInvoice);
+  const all=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');
+  const sale=all.find(x=>x.invoice===invoice);
+  if(!sale){toast('Pending bill not found');return}
+  sale.status='paid';sale.paidAmount=Number(sale.total)||0;sale.balance=0;sale.paymentStatus='paid';
+  localStorage.setItem('bizflow_sales',JSON.stringify(all));
+  renderPendingBills();renderRecent();renderCustomers();refreshPendingCounts();
+  toast(invoice+' marked as paid');
+}
+function pendingCountForPeriod(period){
+  const all=JSON.parse(localStorage.getItem('bizflow_sales')||'[]').filter(x=>x.status==='pending'&&Number(x.balance||0)>0);
+  const now=new Date();
+  const today=now.toISOString().slice(0,10);
+  if(period==='today')return all.filter(x=>x.date===today).length;
+  const start=new Date(now); if(period==='week')start.setDate(start.getDate()-6); if(period==='month')start.setDate(1); if(period==='year'){start.setMonth(0,1)}
+  const s=start.toISOString().slice(0,10);
+  return all.filter(x=>x.date>=s&&x.date<=today).length;
+}
+function refreshPendingCounts(){
+  const active=document.querySelector('.period-tab.active');
+  const period=active?.dataset?.period||'today';
+  const el=document.getElementById('qsPending');if(el)el.textContent=pendingCountForPeriod(period);
+}
+
+function calculateTotals(){
+  const rows=[...document.querySelectorAll('.product-row')];
+  let productTotal=0,wholesale=0;
+  rows.forEach(r=>{
+    const q=+r.querySelector('.p-qty').value||1;
+    const w=+r.querySelector('.p-wholesale').value||0;
+    const s=+r.querySelector('.p-selling').value||0;
+    productTotal+=q*s;
+    wholesale+=q*w;
+  });
+  const delivery=+document.getElementById('delivery').value||0;
+  const packing=+document.getElementById('packingLabel').value||0;
+  // Customer pays product + delivery + packing/label charges.
+  const customerTotal=productTotal+delivery+packing;
+  // Actual profit = customer money received - all business costs.
+  const cost=wholesale+delivery+packing;
+  const profit=customerTotal-cost;
+  return {productTotal,total:customerTotal,wholesale,delivery,packing,cost,profit};
+}
+function calc(){
+  const t=calculateTotals();
+  document.getElementById('stotal').textContent=money(t.total);
+  document.getElementById('sprofit').textContent=money(t.profit);
+  updateBalancePreview(t.total);
+}
+function nextInvoiceNumber(){let n=Number(localStorage.getItem('bizflow_invoice_no')||1000)+1;localStorage.setItem('bizflow_invoice_no',n);return 'INV-'+String(n).padStart(5,'0')}
+function businessInfo(){
+  const get=id=>document.getElementById(id)?.value?.trim()||'';
+  return {
+    name:get('bizname')||document.querySelector('.user b')?.textContent||'Demo Business',
+    phone:get('bizphone')||'+91 98765 43210',
+    location:get('bizlocation')||'Chennai, Tamil Nadu',
+    email:get('bizemail')||'hello@demobusiness.com',
+    address:get('bizaddress')||get('bizlocation')||'Chennai, Tamil Nadu'
+  };
+}
+function addDemoCustomer(r){const data=JSON.parse(localStorage.getItem('bizflow_customers')||'[]');const existing=data.find(x=>x.phone===r.phone);if(existing){existing.name=r.name;existing.address=r.address;existing.lastPurchase=r.date;existing.totalSpent=(Number(existing.totalSpent)||0)+r.total}else data.unshift({name:r.name,phone:r.phone,address:r.address,lastPurchase:r.date,totalSpent:r.total});localStorage.setItem('bizflow_customers',JSON.stringify(data))}
+function openBill(r){
+  const biz=businessInfo();
+  const date=new Date(r.date+'T00:00:00').toLocaleDateString('en-IN');
+  const rows=r.products.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${p.qty}</td><td>${money(p.selling)}</td><td>${money(p.qty*p.selling)}</td></tr>`).join('');
+  const deliveryLine=r.delivery>0
+    ? `<tr><td colspan="3">Delivery</td><td>${money(r.delivery)}</td></tr>`
+    : `<tr><td colspan="3">Delivery</td><td>Free</td></tr>`;
+  document.getElementById('billContent').innerHTML=`
+    <div class="invoice-top">
+      <div class="seller-details">
+        <div class="mini-title">SELLER</div>
+        <b>${escapeHtml(biz.name)}</b>
+        <div>${escapeHtml(biz.location)}</div>
+        <div>${escapeHtml(biz.email)}</div>
+      </div>
+      <div class="buyer-details">
+        <div class="mini-title">INVOICE</div>
+        <div><b>${escapeHtml(r.invoice)}</b></div>
+        <div>${date}</div>
+        <br>
+        <div class="mini-title">BILL TO</div>
+        <div><b>${escapeHtml(r.name)}</b></div>
+        <div>${escapeHtml(r.phone)}</div>
+        <div>${escapeHtml(r.address)}</div>
+         <div style="margin-top:8px"><b>Payment:</b> ${escapeHtml(r.paymentStatus==='pending'?'Pending':'Paid')}</div>${r.paymentStatus==='pending'?`<div><b>Paid:</b> ${money(r.paidAmount)}</div><div><b>Balance:</b> ${money(r.balance)}</div>`:''}
+      </div>
+    </div>
+    <div class="invoice-products">
+      <table>
+        <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          ${deliveryLine}
+          <tr><td colspan="3"><b>Grand Total</b></td><td><b>${money(r.total)}</b></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="invoice-thanks">Thank you for choosing us. Have a great day!</div>`;
+  document.querySelector('.billhead').innerHTML=`
+    <div class="bill-business-title">${escapeHtml(biz.name)}</div>
+    <button class="close" onclick="closeModal()">✕</button>`;
+  document.getElementById('billModal').classList.add('show');
+}
+function closeModal(){document.getElementById('billModal').classList.remove('show')}
+function printBill(){
+  const content=document.getElementById('billContent').innerHTML;
+  const biz=businessInfo();
+  const w=window.open('','_blank','width=760,height=900');
+  if(!w){toast('Please allow pop-ups to save the PDF');return}
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(biz.name)} Invoice</title><style>
+  *{box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;margin:0;padding:38px;color:#172033;background:#fff}
+  .head{text-align:center;border-bottom:1px solid #e5e7eb;padding-bottom:18px;margin-bottom:8px}.business{font-size:24px;font-weight:800}
+  .invoice-top{display:flex;justify-content:space-between;gap:40px;padding:18px 0 24px}.seller-details,.buyer-details{width:48%;line-height:1.65;font-size:12px}.buyer-details{text-align:right}
+  .mini-title{font-size:9px;color:#667085;font-weight:800;letter-spacing:1px;margin-bottom:5px}.invoice-products table{width:100%;border-collapse:collapse;font-size:13px}
+  .invoice-products td,.invoice-products th{padding:11px 8px;border-bottom:1px solid #e5e7eb;text-align:left}.invoice-products td:nth-child(n+2),.invoice-products th:nth-child(n+2){text-align:right}.invoice-products tfoot td{border-bottom:0}
+  .invoice-thanks{text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;color:#667085;font-size:12px;font-weight:600}@media print{body{padding:15px}}
+  </style></head><body><div class="head"><div class="business">${escapeHtml(biz.name)}</div></div>${content}</body></html>`);
+  w.document.close();
+  w.onload=()=>{w.focus();setTimeout(()=>{w.print();},250)};
+}
+function saveCustomerAndGenerateBill(){
+  const name=document.getElementById('cname').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const address=document.getElementById('address').value.trim();
+  const date=document.getElementById('invoiceDate').value;
+  const products=getProducts();
+  if(!name){toast('Customer name is required');document.getElementById('cname').focus();return}
+  if(!phone){toast('Phone number is required');document.getElementById('phone').focus();return}
+  if(!address){toast('Customer address is required');document.getElementById('address').focus();return}
+  if(!products.length){toast('Add at least one product');return}
+  const t=calculateTotals();
+  if(products.some(p=>p.selling<=0)){toast('Enter selling price for every product');return}
+  const paymentStatus=document.getElementById('paymentStatus')?.value||'paid';
+  const paidAmount=paymentStatus==='pending'?(+document.getElementById('paidAmount').value||0):t.total;
+  if(paymentStatus==='pending' && paidAmount>=t.total){toast('For a pending bill, paid amount must be less than the total');return}
+  if(paymentStatus==='pending' && paidAmount<0){toast('Paid amount cannot be negative');return}
+  const balance=Math.max(0,t.total-paidAmount);
+  const r={
+    invoice:nextInvoiceNumber(),date,name,phone,address,
+    products,delivery:t.delivery,packing:t.packing,
+    total:t.total,productTotal:t.productTotal,wholesale:t.wholesale,
+    profit:t.profit,method:document.getElementById('method').value,
+    status:paymentStatus,paidAmount,balance,paymentStatus
+  };
+  const salesSaved=JSON.parse(localStorage.getItem('bizflow_sales')||'[]');
+  salesSaved.unshift(r);localStorage.setItem('bizflow_sales',JSON.stringify(salesSaved));
+  addDemoCustomer(r);
+  renderRecent();renderCustomers();
+  openBill(r);
+  toast('Customer saved and bill generated');
+}
+function hideZero(el){if(el && Number(el.value)===0)el.value='';calc()}
+function clearForm(){document.getElementById('cname').value='';document.getElementById('phone').value='';document.getElementById('address').value='';document.getElementById('delivery').value='';document.getElementById('packingLabel').value='';document.getElementById('method').value='Cash';document.getElementById('paymentStatus').value='paid';document.getElementById('paidAmount').value='';document.getElementById('productRows').innerHTML='';updatePaymentFields();addProductRow();initInvoiceDate();calc()}
+function filterCustomers(v){renderCustomers(v)}
+function saveSettings(){const n=document.getElementById('bizname').value||'Demo Business';localStorage.setItem('bizflow_business_name',n);document.querySelector('.user b').textContent=n;document.getElementById('brandName').textContent=n;document.getElementById('brandLogo').textContent=n.trim().charAt(0).toUpperCase();document.querySelector('.avatar').textContent=n.trim().charAt(0).toUpperCase();document.getElementById('pageTitle').textContent='Welcome to '+n+' 👋';toast('Branding saved')}
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+renderChart();renderRecent();renderCustomers();renderReports();addProductRow();initInvoiceDate();updatePaymentFields();calc();setPeriod('today',document.querySelector('.period-tab.active'));setInterval(rotateCustomerGrowth,3000);
+</script>
+</body>
+</html>
